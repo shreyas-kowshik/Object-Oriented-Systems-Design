@@ -8,11 +8,13 @@ typedef struct Point {
 	int y;
 };
 
+void plotPoints(vector<Point>);
+
 vector<Point> global_points;
 Point global_bottom; // the bottom most point for Graham scan
 int N = 50; // number of points to be generated
-int RANGE = 350; // the points will be generated with co-ordinates in the range : [1,RANGE-1]
-int DELAY_TIME = 20; // the number of miliseconds to wait between two steps, used for displaying/animation
+int RANGE = 250; // the points will be generated with co-ordinates in the range : [1,RANGE-1]
+int DELAY_TIME = 100; // the number of miliseconds to wait between two steps, used for displaying/animation
 
 void read_nos() {
         //Opens a file and reads the numbers to the vector
@@ -43,6 +45,16 @@ void write_nos_to_file() {
 	
         for(int i = 0;i < N;i++) {
                 myfile << rand()%RANGE + 1 << " " << rand()%RANGE + 1 << " ";// write as x y in file
+        }
+        myfile << "\n";
+        myfile.close();
+}
+
+void print_ar(vector<Point>& arr) {
+        ofstream myfile;
+        myfile.open("output.txt");
+        for(int i = 0;i < arr.size();i++) {
+                myfile << arr[i].x << " " << arr[i].y << " " ;
         }
         myfile << "\n";
         myfile.close();
@@ -120,7 +132,6 @@ int getMaxAnglePoint(vector<Point> hull,Point pk_1,Point pk) {
 	int l = 0,h = hull.size() - 1;
 	int m = (l + h)/2;
 
-	/*	
 	// Binary search
 	while(l <= h) {
 		m = (l + h)/2;
@@ -152,19 +163,6 @@ int getMaxAnglePoint(vector<Point> hull,Point pk_1,Point pk) {
 	}
 
 	return m;	
-	*/
-
-	double max_angle = -100000;
-	int id = -1;
-	for(int i = 0;i < hull.size();i++) {
-		double theta = getAngle(pk_1,pk,hull[i]);
-		if (theta >= max_angle) {
-			max_angle = theta;
-			id = i;
-		}
-	}
-
-	return id;
 }
 
 void plotPoint(Point p) {
@@ -240,15 +238,6 @@ vector<Point> GrahamScan(vector<Point> points) {
 	if(m_points.size() < 3) {
 		return m_points;
 	}
-
-	/*
-	if(s < 3) {
-		cout << "Convex Hull Not Possible By Graham Scan" << endl;
-		cout << "Aborting..." << endl;
-		exit(1);
-	}
-	*/
-	//print_points(m_points);
 	
 	S.push(m_points[0]);
 	S.push(m_points[1]);
@@ -282,7 +271,6 @@ vector<Point> Chans(vector<Point> points,int m,int H) {
 			up_lim = points.size();
 		else
 			up_lim = (i + 1) * subset_size;
-		cout << up_lim << endl;
 
 		vector<Point> sub_points;
 		for(int j = i * subset_size;j < up_lim;j++) {
@@ -293,16 +281,9 @@ vector<Point> Chans(vector<Point> points,int m,int H) {
 		hulls.push_back(hull);
 	}
 
-	/*
-	for(int i = 0;i < hulls.size();i++) {
-    		setcolor(RED);
-		plotPolygon(hulls[i]);
-	}
-	*/
-	
 	Point p0;
 	p0.x = 0;
-	p0.y = -10000000; // Equivalent to -infinity in our range, as points are only upto RANGE = 300
+	p0.y = 100000; // Equivalent to -infinity in our range, as points are only upto RANGE = 300
 	
 	Point p1;
 	vector<Point> convex_hull; // stores the points for the final convex hull
@@ -333,15 +314,14 @@ vector<Point> Chans(vector<Point> points,int m,int H) {
 	pk_1.x = p0.x;
 	pk_1.y = p0.y;
 
+
 	for(int k = 0;k < H;k++) {
 		vector<Point> max_angle_points;
 		for(int i = 0;i < hulls.size();i++) {
 			int p_id = getMaxAnglePoint(hulls[i],pk_1,pk);
 			max_angle_points.push_back(hulls[i][p_id]);
-			setcolor(YELLOW);
-			plotPoint(hulls[i][p_id]);
-			//delay(DELAY_TIME);
 		}
+		delay(DELAY_TIME);	
 		
 		double max_angle = -1000000.0;
 		Point next_point;
@@ -354,9 +334,7 @@ vector<Point> Chans(vector<Point> points,int m,int H) {
 			}
 		}
 
-		setcolor(CYAN);
-		plotPoint(next_point);
-		//delay(DELAY_TIME);
+		delay(DELAY_TIME);
 		if(next_point.x == p1.x && next_point.y == p1.y) {
 			return convex_hull;
 		}
@@ -367,7 +345,8 @@ vector<Point> Chans(vector<Point> points,int m,int H) {
 			pk.x = next_point.x;
 			pk.y = next_point.y;							
 		}
-		
+		setcolor(WHITE);
+		line(pk_1.x,pk_1.y,pk.x,pk.y);
 	}
 	
 	vector<Point> empty_hull;
@@ -386,35 +365,32 @@ int main() {
 	write_nos_to_file();	
 	read_nos();
 	
-	plotPoints(global_points);
-	//delay(DELAY_TIME);
-
-	cout << "Points size : " << global_points.size() << endl;	
-
 	vector<Point> hull;
 	int t = 1;
 	while(true) {
+		cleardevice();
+		plotPoints(global_points);
 		int H = (int)(pow(2,pow(2,t)));
 		H = min(H,global_points.size());
+		cout << endl << "--------------Trial-------------" << endl;
+		cout << "m = H = " << H << endl << endl << endl;
 		if (H > global_points.size()) break;
 		hull = Chans(global_points,H,H);
 		if(hull.size() < 1) {
+			cout << "Convex Hull not found, trying for different m and H..." << endl;
 			t++;
 			continue;
 		}
 		setcolor(YELLOW);
 		plotPolygon(hull);
-		//getch();
-		//delay(5000);
-		//break;
-		t++;
+		break;
 	}
-	//vector<Point> hull = GrahamScan(global_points);
-	//print_points(hull);
-	setcolor(WHITE);
+	
+	setcolor(YELLOW);
 	plotPolygon(hull);
-
+	cout << "Hull Found!" << endl << "Press any key to exit the program..." << endl;
 	getch();
-    	closegraph();	
+    	closegraph();
+	print_ar(hull);	
 	return 0;
 }
