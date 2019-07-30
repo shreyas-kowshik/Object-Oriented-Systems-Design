@@ -12,7 +12,7 @@ void plotPoints(vector<Point>);
 
 vector<Point> global_points;
 Point global_bottom; // the bottom most point for Graham scan
-int N = 50; // number of points to be generated
+int N = 100; // number of points to be generated
 int RANGE = 250; // the points will be generated with co-ordinates in the range : [1,RANGE-1]
 int DELAY_TIME = 100; // the number of miliseconds to wait between two steps, used for displaying/animation
 
@@ -66,6 +66,15 @@ int orientation(Point p,Point q,Point r) {
 	if(res == 0) return 0;// p,q,r are colinear
 	if(res > 0) return 1;//p,q,r are clockwise oriented
 	else return 2;//p,q,r are counter-clockwise oriented
+}
+
+
+int orientation_(Point p,Point q,Point r) {
+	int res = (q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y);
+	
+	if(res == 0) return 0;// p,q,r are colinear
+	if(res > 0) return -1;//p,q,r are clockwise oriented
+	else return 1;//p,q,r are counter-clockwise oriented
 }
 
 double dist(Point p1,Point p2) {
@@ -127,42 +136,43 @@ void print_points(vector<Point> points) {
 	}
 }
 
+int tangent(vector<Point> v,Point p){
+}
+
 int getMaxAnglePoint(vector<Point> hull,Point pk_1,Point pk) {
 	// Returns the point p with the largest angle pk_1,pk,p from the hull
-	int l = 0,h = hull.size() - 1;
-	int m = (l + h)/2;
+	int l=0;
+	int r = hull.size();
+	int l_before = orientation_(pk, hull[0], hull[hull.size()-1]);
+	int l_after = orientation_(pk, hull[0], hull[(l + 1) % hull.size()]);
+	while (l < r){
+		int c = ((l + r)>>1);
+		int c_before = orientation_(pk, hull[c], hull[(c - 1) % hull.size()]);
+		int c_after = orientation_(pk, hull[c], hull[(c + 1) % hull.size()]);
+		int c_side = orientation_(pk, hull[l], hull[c]);
+		if (c_before != 1 and c_after != 1)
+			return c;
+		else if ((c_side == -1) and (l_after == 1 or l_before == l_after) or (c_side == 1 and c_before == 1))
+			r = c;
+		else
+			l = c + 1 ;
+		l_before = -c_after; 
+		l_after = orientation_(pk, hull[l], hull[(l + 1) % hull.size()]);
+	}
+	return l;
 
-	// Binary search
-	while(l <= h) {
-		m = (l + h)/2;
-
-		double theta_current = getAngle(pk_1,pk,hull[m]);
-		
-		if(m > 0) {
-			double theta_prev = getAngle(pk_1,pk,hull[m-1]);
-			if (theta_prev <= theta_current) {
-				l = m + 1;
-				continue;
-			}
-			else {
-				h = m - 1;
-				continue;
-			}
-		}
-		else {
-			double theta_next = getAngle(pk_1,pk,hull[m+1]);
-			if (theta_next >= theta_current) {
-				l = m + 1;
-				continue;
-			}
-			else {
-				h = m - 1;
-				continue;
-			}
+	/*
+	double max_angle = -100000;
+	int id = -1;
+	for(int i = 0;i < hull.size();i++) {
+		double theta = getAngle(pk_1,pk,hull[i]);
+		if (theta >= max_angle) {
+			max_angle = theta;
+			id = i;
 		}
 	}
-
-	return m;	
+	return id;
+	*/
 }
 
 void plotPoint(Point p) {
