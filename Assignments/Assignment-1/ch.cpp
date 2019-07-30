@@ -15,6 +15,8 @@ Point global_bottom; // the bottom most point for Graham scan
 int N = 100; // number of points to be generated
 int RANGE = 250; // the points will be generated with co-ordinates in the range : [1,RANGE-1]
 int DELAY_TIME = 100; // the number of miliseconds to wait between two steps, used for displaying/animation
+int SHOW_WORKING = 1; // whether to show the intermediate angle computation in Chan's algorithm
+int WORKING_TIME = 300; // number of miliseconds to wait between two steps for showing working, used for displaying/animation
 
 void read_nos() {
         //Opens a file and reads the numbers to the vector
@@ -40,27 +42,48 @@ void read_nos() {
 }
 
 void write_nos_to_file() {
+	// Points are written as x y ... (x y pairs seperated by a space)
         ofstream myfile;
         myfile.open("input.txt");
 	
         for(int i = 0;i < N;i++) {
-                myfile << rand()%RANGE + 1 << " " << rand()%RANGE + 1 << " ";// write as x y in file
+                myfile << rand()%RANGE + 1 << " " << rand()%RANGE + 1 << " "; // write as x y in file
         }
         myfile << "\n";
         myfile.close();
 }
 
 void print_ar(vector<Point>& arr) {
+	// Points are written as x y ... (x y pairs seperated by a space)
         ofstream myfile;
         myfile.open("output.txt");
         for(int i = 0;i < arr.size();i++) {
-                myfile << arr[i].x << " " << arr[i].y << " " ;
+                myfile << arr[i].x << " " << arr[i].y << " ";
         }
         myfile << "\n";
         myfile.close();
 }
 
+void plotPoint(Point p) {
+	circle(p.x,p.y,2);
+}
+
+void plotPoints(vector<Point> points) {
+    	setcolor(GREEN);	
+	for(int i = 0;i < points.size();i++) {
+		circle(points[i].x, points[i].y, 1);
+	}		
+}
+
+void plotPolygon(vector<Point> vertices) {
+	for(int i = 0;i < vertices.size() - 1;i++) {
+		line(vertices[i].x,vertices[i].y,vertices[i+1].x,vertices[i+1].y);	
+	}
+	line(vertices[0].x,vertices[0].y,vertices[vertices.size() - 1].x,vertices[vertices.size() - 1].y);
+}
+
 int orientation(Point p,Point q,Point r) {
+	// returns wheter the points are clockwise, counter clockwise or colinear
 	int res = (q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y);
 	
 	if(res == 0) return 0;// p,q,r are colinear
@@ -83,6 +106,7 @@ double dist(Point p1,Point p2) {
 
 int compare(const void *vp1, const void *vp2) 
 { 
+   // comparator function for sorting two points, used in the qsort function to compare two points while sorting
    Point *p1 = (Point *)vp1; 
    Point *p2 = (Point *)vp2; 
   
@@ -95,6 +119,7 @@ int compare(const void *vp1, const void *vp2)
 }
 
 double norm(Point p) {
+	// returns the norm of a vector
 	return sqrt(pow(p.x,2) + pow(p.y,2));
 }
 
@@ -116,6 +141,7 @@ double getAngle(Point p,Point q,Point r) {
 }
 
 Point nextToTop(stack<Point> S) {
+	// returns the point next to the top in stack
 	Point p = S.top();
 	S.pop();
 	Point out = S.top();
@@ -136,9 +162,6 @@ void print_points(vector<Point> points) {
 	}
 }
 
-int tangent(vector<Point> v,Point p){
-}
-
 int getMaxAnglePoint(vector<Point> hull,Point pk_1,Point pk) {
 	// Returns the point p with the largest angle pk_1,pk,p from the hull
 	int l=0;
@@ -150,6 +173,18 @@ int getMaxAnglePoint(vector<Point> hull,Point pk_1,Point pk) {
 		int c_before = orientation_(pk, hull[c], hull[(c - 1) % hull.size()]);
 		int c_after = orientation_(pk, hull[c], hull[(c + 1) % hull.size()]);
 		int c_side = orientation_(pk, hull[l], hull[c]);
+		
+		// Displaying intermediate steps
+		if (SHOW_WORKING) {
+			cleardevice();
+			plotPoints(global_points);
+			setcolor(RED);
+			plotPolygon(hull);
+			setcolor(WHITE);
+			line(hull[c].x,hull[c].y,pk.x,pk.y);
+			delay(WORKING_TIME);
+		}
+		
 		if (c_before != 1 and c_after != 1)
 			return c;
 		else if ((c_side == -1) and (l_after == 1 or l_before == l_after) or (c_side == 1 and c_before == 1))
@@ -160,37 +195,6 @@ int getMaxAnglePoint(vector<Point> hull,Point pk_1,Point pk) {
 		l_after = orientation_(pk, hull[l], hull[(l + 1) % hull.size()]);
 	}
 	return l;
-
-	/*
-	double max_angle = -100000;
-	int id = -1;
-	for(int i = 0;i < hull.size();i++) {
-		double theta = getAngle(pk_1,pk,hull[i]);
-		if (theta >= max_angle) {
-			max_angle = theta;
-			id = i;
-		}
-	}
-	return id;
-	*/
-}
-
-void plotPoint(Point p) {
-	circle(p.x,p.y,2);
-}
-
-void plotPoints(vector<Point> points) {
-    	setcolor(GREEN);	
-	for(int i = 0;i < points.size();i++) {
-		circle(points[i].x, points[i].y, 1);
-	}		
-}
-
-void plotPolygon(vector<Point> vertices) {
-	for(int i = 0;i < vertices.size() - 1;i++) {
-		line(vertices[i].x,vertices[i].y,vertices[i+1].x,vertices[i+1].y);	
-	}
-	line(vertices[0].x,vertices[0].y,vertices[vertices.size() - 1].x,vertices[vertices.size() - 1].y);
 }
 
 vector<Point> GrahamScan(vector<Point> points) {
@@ -240,8 +244,6 @@ vector<Point> GrahamScan(vector<Point> points) {
 		}
 
 		m_points.push_back(points[i]);	
-		//points[s] = points[i];
-		//s++;
 	}
 
 	
@@ -275,6 +277,8 @@ vector<Point> Chans(vector<Point> points,int m,int H) {
 	int subset_size =  n/m;
 	vector<vector<Point> > hulls; // stores convex hulls for each subset
 	
+	// divide the points into m sets
+	// find the convex hull using Graham Scan and store the points
 	for(int i = 0;i < m;i++) {
 		int up_lim;
 		if(i == m - 1)
@@ -299,6 +303,7 @@ vector<Point> Chans(vector<Point> points,int m,int H) {
 	vector<Point> convex_hull; // stores the points for the final convex hull
 	int hull_id = -1, max_x = -1,point_id = -1;
 
+	// Find the rightmost point in the set
 	for(int i = 0;i < hulls.size();i++) {
 		for(int j = 0;j < hulls[i].size();j++) {
 			if(hulls[i][j].x > max_x) {
@@ -311,8 +316,10 @@ vector<Point> Chans(vector<Point> points,int m,int H) {
 		}
 	}
 
+	// the rightmost point is in the convex hull, so add it
 	convex_hull.push_back(p1);
 	
+	// Display the mini-convex hulls obtained using Graham scan
 	setcolor(RED);
 	for(int i = 0;i < hulls.size();i++) {
 		plotPolygon(hulls[i]);
@@ -325,8 +332,8 @@ vector<Point> Chans(vector<Point> points,int m,int H) {
 	pk_1.y = p0.y;
 
 
-	for(int k = 0;k < H;k++) {
-		vector<Point> max_angle_points;
+	for(int k = 0;k < H;k++) { // Chan's algorithm iteration
+		vector<Point> max_angle_points;// stores the points qi's which maximise the angle pk_1,pk,qi for each mini-convex hull
 		for(int i = 0;i < hulls.size();i++) {
 			int p_id = getMaxAnglePoint(hulls[i],pk_1,pk);
 			max_angle_points.push_back(hulls[i][p_id]);
@@ -335,6 +342,7 @@ vector<Point> Chans(vector<Point> points,int m,int H) {
 		
 		double max_angle = -1000000.0;
 		Point next_point;
+		// find the point with the maximum angle among all the maximum angle points from the points obtained above
 		for(int i = 0;i < max_angle_points.size();i++) {
 			double theta = getAngle(pk_1,pk,max_angle_points[i]);
 			if (theta >= max_angle) {
@@ -345,10 +353,12 @@ vector<Point> Chans(vector<Point> points,int m,int H) {
 		}
 
 		delay(DELAY_TIME);
+		// if the next point backtracks to the first point, hull has been found
 		if(next_point.x == p1.x && next_point.y == p1.y) {
 			return convex_hull;
 		}
 		else {
+			// update the points
 			convex_hull.push_back(next_point);
 			pk_1.x = pk.x;
 			pk_1.y = pk.y;
@@ -359,6 +369,7 @@ vector<Point> Chans(vector<Point> points,int m,int H) {
 		line(pk_1.x,pk_1.y,pk.x,pk.y);
 	}
 	
+	// no hull found
 	vector<Point> empty_hull;
 	return empty_hull;
 }
@@ -376,7 +387,7 @@ int main() {
 	read_nos();
 	
 	vector<Point> hull;
-	int t = 1;
+	int t = 1; // For updating the value of m (the number of mini-convex hulls to be formed by Graham Scan
 	while(true) {
 		cleardevice();
 		plotPoints(global_points);
@@ -396,6 +407,7 @@ int main() {
 		break;
 	}
 	
+	// Draw the convex hull
 	setcolor(YELLOW);
 	plotPolygon(hull);
 	cout << "Hull Found!" << endl << "Press any key to exit the program..." << endl;
