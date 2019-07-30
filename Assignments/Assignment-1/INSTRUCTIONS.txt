@@ -1,0 +1,9 @@
+The graphics library used includes the header `graphics.h`. 
+To install the library code, run the following command : 
+
+bash install.sh
+
+To run the code, run the following command : 
+
+g++ ch.cpp -lgraph
+./a.out
