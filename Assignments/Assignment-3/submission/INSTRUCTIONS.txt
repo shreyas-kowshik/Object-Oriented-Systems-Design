@@ -1,0 +1,13 @@
+For running the programs : 
+
+// First Program
+g++ kt.cpp
+./a.out
+
+// Second Program
+g++ kt2.cpp
+./a.out
+
+// Third Program
+g++ kt3.cpp
+./a.out

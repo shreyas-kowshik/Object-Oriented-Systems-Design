@@ -1,0 +1,6 @@
+The following paper was referenced for this task : 
+http://math.oregonstate.edu/~math_reu/proceedings/REU_Proceedings/Proceedings2004/2004Ganzfried.pdf
+
+The idea is that, Warnsdorff' algorithm computes the solution in linear time but is not garunteed to find a solution at all times. This is so because it breaks ties randomly and hence the heuristic is not garunteed to give the solution at all times. Instead, the above referenced paper proposes to break ties according the region of the board the knight is present in. Based on experiments and previously observed results, a greedy table of cases are formulated, based on the board size and the region the knight is present in, for the order of moves to break ties with. For instance, on numbering the moves as {1,2,3,4,5,6,7,8}, for a case of m%8 == 0 and until the knight reaches the cell (m-1,m-2), a permutation of {3,4,2,6,1,5,7,8} is followed on the moves to break ties when two moves have the same degree.
+
+This was experimentally found to work for all but m = 74. In practice the bound can be established for m >= 75 and thus this can compute the solution in linear time for all those values.

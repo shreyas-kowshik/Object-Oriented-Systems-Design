@@ -1,0 +1,1 @@
+To pass an encrypted message from one person to another, it is first necessary that both parties have the  for the cipher, so that the sender may encrypt it and the receiver may decrypt it For the caesar cipher the key is the number of characters to shift the cipher alphabet

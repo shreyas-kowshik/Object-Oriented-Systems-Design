@@ -1,0 +1,46 @@
+-----------------------
+State : 0:: Head : 1 :: Tape Contents : $aabbcc$
+-----------------------
+State : 1:: Head : 2 :: Tape Contents : $Xabbcc$
+-----------------------
+State : 1:: Head : 3 :: Tape Contents : $Xabbcc$
+-----------------------
+State : 2:: Head : 4 :: Tape Contents : $XaYbcc$
+-----------------------
+State : 2:: Head : 5 :: Tape Contents : $XaYbcc$
+-----------------------
+State : 3:: Head : 4 :: Tape Contents : $XaYbZc$
+-----------------------
+State : 3:: Head : 3 :: Tape Contents : $XaYbZc$
+-----------------------
+State : 3:: Head : 2 :: Tape Contents : $XaYbZc$
+-----------------------
+State : 3:: Head : 1 :: Tape Contents : $XaYbZc$
+-----------------------
+State : 0:: Head : 2 :: Tape Contents : $XaYbZc$
+-----------------------
+State : 1:: Head : 3 :: Tape Contents : $XXYbZc$
+-----------------------
+State : 1:: Head : 4 :: Tape Contents : $XXYbZc$
+-----------------------
+State : 2:: Head : 5 :: Tape Contents : $XXYYZc$
+-----------------------
+State : 2:: Head : 6 :: Tape Contents : $XXYYZc$
+-----------------------
+State : 3:: Head : 5 :: Tape Contents : $XXYYZZ$
+-----------------------
+State : 3:: Head : 4 :: Tape Contents : $XXYYZZ$
+-----------------------
+State : 3:: Head : 3 :: Tape Contents : $XXYYZZ$
+-----------------------
+State : 3:: Head : 2 :: Tape Contents : $XXYYZZ$
+-----------------------
+State : 0:: Head : 3 :: Tape Contents : $XXYYZZ$
+-----------------------
+State : 4:: Head : 4 :: Tape Contents : $XXYYZZ$
+-----------------------
+State : 4:: Head : 5 :: Tape Contents : $XXYYZZ$
+-----------------------
+State : 4:: Head : 6 :: Tape Contents : $XXYYZZ$
+-----------------------
+State : 4:: Head : 7 :: Tape Contents : $XXYYZZ$

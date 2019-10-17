@@ -3,18 +3,22 @@
 using namespace std;
 
 int N = 7; // number of points
-int RANGE = 100;
-int INF = 1000000;
+int RANGE = 100;// points are generated randomly in the range [0,RANGE)
+int INF = 1000000;// Numerical value of infinity, we assume that all points have co-ordinates' absolute value less than this
+
+// counters to keep track of
+int ctree = 0;
+int qpoint = 0;
 
 typedef struct point {
 	int x;
 	int y;
 };
 
-vector<point> global_points;
-vector<point> output_points;
+vector<point> global_points;// to store the input points
+vector<point> output_points;// to store the output points
 
-typedef struct Region {
+typedef struct Region { // used to define the region of a node
 	int xl;// top left x co-ordinate
 	int yl;// top left y co-ordinate
 	int xr;// bottom right x co-ordinate
@@ -32,7 +36,7 @@ typedef struct node {
 	struct node *left;
 	struct node *right;
 
-	Region region;	
+	Region region;// stores the region of a node
 };
 
 node *root = NULL;
@@ -95,10 +99,6 @@ void print_array(vector<point> arr) {
 
 bool x_compare(point p1, point p2)
 {
-   // comparator function for sorting two points, used in the qsort function to compare two points while sorting
-   //point *p1 = (point *)vp1; 
-   //point *p2 = (point *)vp2;
-
    if(p1.x < p2.x) return true; 
    if(p1.x == p2.x) return true;
    if(p1.x > p2.x) return false;
@@ -106,10 +106,6 @@ bool x_compare(point p1, point p2)
 
 bool y_compare(point p1, point p2)
 {
-   // comparator function for sorting two points, used in the qsort function to compare two points while sorting
-   //point *p1 = (point *)vp1; 
-   //point *p2 = (point *)vp2;
-
    if(p1.y < p2.y) return true; 
    if(p1.y == p2.y) return true;
    if(p1.y > p2.y) return false;
@@ -137,8 +133,8 @@ node* initNode(int x,int y,int depth) {
 void inOrder(node *current) {
 	if(current == NULL) return;
 	inOrder(current->left);
-	//if(isLeaf(current))
-		cout << "In Region : " << current->p.x << " " << current->p.y << endl;
+	cout << current->p.x << " " << current->p.y << endl;
+	output_points.push_back(current->p);
 	inOrder(current->right);
 }
 
@@ -159,7 +155,7 @@ int checkNodeInRange(node *current,int xl,int yl,int xr,int yr) {
 
 // Build the tree
 node* build_tree(vector<point> points,int i,int j,int depth) {
-	// if(i > j) return NULL;
+	ctree++;
 	if(i >= j) {
 		// return a leaf node with the point co-ordinates
 		node *current = initNode(points[i].x,points[i].y,depth);
@@ -178,8 +174,8 @@ node* build_tree(vector<point> points,int i,int j,int depth) {
 		sort(points.begin() + i,points.begin() +  j + 1, y_compare);	
 	}
 
-	node *left = build_tree(points,i,mid,depth + 1);
-	node *right = build_tree(points,mid + 1,j,depth + 1);
+	node *left = build_tree(points,i,mid,depth + 1);// build tree in the left half of the points
+	node *right = build_tree(points,mid + 1,j,depth + 1);// build tree in the right half of the points
 
 	node *current;
 	if(depth % 2 == 0)
@@ -193,6 +189,7 @@ node* build_tree(vector<point> points,int i,int j,int depth) {
 }
 
 int checkLeftRegionInRange(node *current,int xl,int yl,int xr,int yr) {
+	// this function checks whether a node's region lies completely inside the query range	
 	Region left_child_region;
 	if(current->p.x == 0) { // if horizontal line
 		left_child_region.xl = current->region.xl;
@@ -215,6 +212,7 @@ int checkLeftRegionInRange(node *current,int xl,int yl,int xr,int yr) {
 }
 
 int checkLeftRegionIntersectsRange(node *current,int xl,int yl,int xr,int yr) {
+	// this function checks whether a node's region intersects the query range
 	Region left_child_region;
 	if(current->p.x == 0) { // if horizontal line
 		left_child_region.xl = current->region.xl;
@@ -237,6 +235,7 @@ int checkLeftRegionIntersectsRange(node *current,int xl,int yl,int xr,int yr) {
 }
 
 int checkRightRegionInRange(node *current,int xl,int yl,int xr,int yr) {
+	// this function checks whether a node's region lies completely inside the query range	
 	Region right_child_region;
 	if(current->p.x == 0) { // if horizontal line
 		right_child_region.xl = current->region.xl;
@@ -259,6 +258,7 @@ int checkRightRegionInRange(node *current,int xl,int yl,int xr,int yr) {
 }
 
 int checkRightRegionIntersectsRange(node *current,int xl,int yl,int xr,int yr) {
+	// this function checks whether a node's region intersects the query range
 	Region right_child_region;
 	if(current->p.x == 0) { // if horizontal line
 		right_child_region.xl = current->region.xl;
@@ -281,36 +281,26 @@ int checkRightRegionIntersectsRange(node *current,int xl,int yl,int xr,int yr) {
 }
 
 void query(node *current,int xl,int yl,int xr,int yr) {
-	//cout << "In Query " << endl;
-	if(isLeaf(current)) {
+	qpoint++;
+	if(isLeaf(current)) {// if we reach the leaf as a query point, check if it is in the range and print it if it is
 		if(checkNodeInRange(current,xl,yl,xr,yr)) {
-			//print_node(current);
 			cout << current->p.x << " " << current->p.y << endl;
 			output_points.push_back(current->p);
 		}
 		return;	
 	}		
-	if(checkLeftRegionInRange(current,xl,yl,xr,yr)) {
-		//cout << "1 " << endl;
-		inOrder(current->left);
+	if(checkLeftRegionInRange(current,xl,yl,xr,yr)) { // if region of left node is in range
+		inOrder(current->left); // traverse all it's children and print the leaf nodes
 	}
-	else if(checkLeftRegionIntersectsRange(current,xl,yl,xr,yr)) {
-		//cout << "2 " << endl;
-		//print_node(current);
-		query(current->left,xl,yl,xr,yr);
+	else if(checkLeftRegionIntersectsRange(current,xl,yl,xr,yr)) { // if region of left node intersects range
+		query(current->left,xl,yl,xr,yr); // looks for the points in the left node
 	}	
-	//print_node(current);
-	if(checkRightRegionInRange(current,xl,yl,xr,yr)) {
-		//cout << "3 " << endl;
+	if(checkRightRegionInRange(current,xl,yl,xr,yr)) { // if region of right node is in range
 		inOrder(current->right);
 	}
-	else if(checkRightRegionIntersectsRange(current,xl,yl,xr,yr)) {
-		//cout << "4 " << endl;
-		//print_node(current);
+	else if(checkRightRegionIntersectsRange(current,xl,yl,xr,yr)) { // if region of right node intersects range
 		query(current->right,xl,yl,xr,yr);
 	}
-	//cout << "Leaving Query " << endl;
-	//print_node(current);
 }
 
 int main() {
@@ -321,7 +311,10 @@ int main() {
 	int choice;
 	cin >> choice;
 	
-	if(choice == 1) {
+	if(choice == 1) {	
+		cout << "Enter the number of points to provide values : ";
+		cin >> N;
+
 		write_nos_to_file();
 		read_nos();
 	}
@@ -362,6 +355,10 @@ int main() {
 	
 	// write output points to file
 	print_ar(output_points);
+	
+	cout << "k : " << output_points.size() << endl;	
+	cout << "ctree : " << ctree << endl;
+	cout << "qpoint : " << qpoint << endl;
 	
 	return 0;
 }

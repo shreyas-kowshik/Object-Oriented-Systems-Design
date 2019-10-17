@@ -1,0 +1,8 @@
+This is a general code to run for any value of the inputs.
+The input points can be entered manually or can be generated randomly. This will write the generated input points to a file and will use it for further processing.
+
+You can repeat the values of the x and y co-ordinates for the points and the algorithm will give you the number of points in a query rectangle. 
+
+To run : 
+g++ query.cpp
+./a.out
